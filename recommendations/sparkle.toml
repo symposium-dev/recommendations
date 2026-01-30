@@ -1,0 +1,5 @@
+# Sparkle - AI collaboration identity
+# Always recommended for all workspaces
+
+[recommendation]
+source.cargo = { crate = "sparkle-mcp", args = ["--acp"] }

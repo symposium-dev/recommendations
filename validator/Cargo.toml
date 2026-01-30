@@ -1,0 +1,14 @@
+[package]
+name = "recommendations-validator"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "validate"
+path = "src/main.rs"
+
+[dependencies]
+# Use git dependency until symposium-recommendations is published to crates.io
+symposium-recommendations = { git = "https://github.com/symposium-dev/symposium", version = "0.1" }
+anyhow = "1.0"

@@ -1,0 +1,6 @@
+# Cargo - Cargo build/test tools
+# Recommended for Rust projects
+
+[recommendation]
+source.cargo = { crate = "symposium-cargo" }
+when.file-exists = "Cargo.toml"
