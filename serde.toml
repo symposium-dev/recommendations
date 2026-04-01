@@ -2,5 +2,5 @@ name = "symposium-serde"
 
 [[skills]]
 advice-for = ["serde"]
-source.git = "https://github.com/symposium-dev/recommendations/skills/serde"
+source.git = "https://github.com/symposium-dev/recommendations/tree/main/skills/serde"
 
