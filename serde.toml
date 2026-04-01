@@ -1,4 +1,6 @@
-[[skill]]
+name = "symposium-serde"
+
+[[skills]]
 advice-for = ["serde"]
 source = ["https://github.com/symposium-dev/recommendations/skills/serde"]
 
