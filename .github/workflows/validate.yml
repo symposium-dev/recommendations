@@ -1,0 +1,29 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Get symposium SHA
+        id: sha
+        run: |
+          SHA=$(git ls-remote https://github.com/symposium-dev/symposium HEAD | cut -f1)
+          echo "sha=$SHA" >> $GITHUB_OUTPUT
+          echo "sha: $SHA"
+      - name: Cache symposium
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/bin/symposium
+          key: symposium-${{ runner.os }}-${{ steps.sha.outputs.sha }}
+      - name: Install symposium
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: cargo install symposium --git https://github.com/symposium-dev/symposium
+      - name: Validate
+        run: symposium plugin validate .
