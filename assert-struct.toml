@@ -1,0 +1,5 @@
+name = "symposium-assert-struct"
+
+[[skills]]
+advice-for = ["assert-struct"]
+source.git = "https://github.com/symposium-dev/recommendations/tree/main/skills/assert-struct"
