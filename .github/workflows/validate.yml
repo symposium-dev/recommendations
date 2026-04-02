@@ -1,0 +1,16 @@
+name: Validate
+
+on:
+  pull_request:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install symposium
+        run: cargo install symposium --git https://github.com/symposium-dev/symposium
+      - name: Validate
+        run: symposium plugin validate .
