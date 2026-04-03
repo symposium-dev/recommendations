@@ -1,0 +1,283 @@
+Toasty v0.2.0 — Async ORM for Rust (SQL + NoSQL)
+==================================================
+
+1  MODEL DEFINITION
+--------------------
+
+Derive macro: #[derive(toasty::Model)]
+Embed macro:  #[derive(toasty::Embed)]
+
+Field attributes:
+  #[key]           — primary key
+  #[auto]          — auto-generated (auto-increment for integers, UUID v7 for uuid::Uuid)
+  #[unique]        — unique constraint
+  #[index]         — database index
+  #[has_many]      — one-to-many relation, field type: toasty::HasMany<T>
+  #[has_one]       — one-to-one relation, field type: toasty::HasOne<T> or toasty::HasOne<Option<T>>
+  #[belongs_to(key = FK, references = PK)]  — many-to-one, field type: toasty::BelongsTo<T>
+  #[serialize(json)]  — JSON serialization (requires "serde" feature)
+
+Embedded types flatten fields into the parent table. Embedded enums store as discriminants.
+
+Supported field types:
+  Primitives  — i8..i64, u8..u64, isize, usize, bool, String, Vec<u8>
+  Optional    — Option<T>
+  Smart ptrs  — Box<T>, Arc<T>, Cow<'_, T>
+  UUID        — uuid::Uuid (feature: uuid)
+  Decimal     — rust_decimal::Decimal, bigdecimal::BigDecimal (features)
+  DateTime    — jiff types (feature: jiff)
+  JSON        — serde_json::Value (feature: serde)
+
+
+2  DATABASE SETUP
+------------------
+
+let db = toasty::Db::builder()
+    .register::<ModelA>()
+    .register::<ModelB>()
+    .connect(URL)       // or .build(driver)
+    .await?;
+
+Connection strings:
+  sqlite://memory
+  sqlite:///path/to/file.db
+  postgresql://user:pass@host/dbname
+  mysql://user:pass@host/dbname
+  dynamodb://region
+
+Direct driver construction:
+  toasty_driver_sqlite::Sqlite::in_memory()
+
+Pool: Db owns a deadpool connection pool. Clone is cheap (Arc-based).
+Dedicated connection: db.connection().await? — returns Connection.
+
+
+3  EXECUTOR TRAIT
+------------------
+
+pub trait Executor: Send + Sync {
+    async fn transaction(&mut self) -> Result<Transaction<'_>>;
+    async fn exec_untyped(&mut self, stmt: Statement) -> Result<Value>;
+    fn schema(&mut self) -> &Arc<Schema>;
+}
+
+Implementors: Db, Transaction, Connection.
+
+Call pattern: stmt.exec(&mut executor).await?
+
+
+4  CREATE (INSERT)
+-------------------
+
+Builder pattern (generated per model):
+
+  ModelName::create()
+      .field_name(value)
+      .relation_name(RelatedModel::create().field(val))  // nested
+      .exec(&mut db)
+      .await?;
+
+create! macro:
+
+  toasty::create!(User {
+      .name("Alice"),
+      .email("a@b.com"),
+      in user.todos {
+          { .title("Task 1") },
+          { .title("Task 2") },
+      }
+  })
+
+Manual insert:
+
+  use toasty::stmt::Insert;
+  let mut insert = Insert::<Model>::blank_single();
+  insert.set(field_index, value);
+  insert.into_statement().exec(&mut db).await?;
+
+
+5  READ (QUERY)
+----------------
+
+Generated finders:
+  Model::get_by_id(&mut db, &id).await?
+  Model::filter_by_FIELD(value).exec(&mut db).await?
+  Model::all() — returns Query<List<Model>>
+
+Query methods:
+  .and(expr)                — add filter
+  .or(expr)                 — alternative filter
+  .limit(n)                 — limit results
+  .offset(n)                — skip results
+  .order_by(path.asc())     — ascending order
+  .order_by(path.desc())    — descending order
+  .include(path)            — eager-load relation
+  .one()                    — expect exactly one result → Query<Model>
+  .first()                  — expect zero or one → Query<Option<Model>>
+  .count()                  — count matching rows → i64
+  .delete()                 — delete matching rows
+  .paginate(page_size)      — cursor-based pagination
+
+Returning types:
+  Query<List<M>>      → Vec<M>
+  Query<M>            → M (error if missing)
+  Query<Option<M>>    → Option<M>
+
+query! macro:
+  toasty::query!(Model)
+  toasty::query!(Model filter .field == value && .other > 10)
+
+
+6  EXPRESSIONS & PATHS
+-----------------------
+
+Access via: Model::fields().field_name()
+
+Comparison operators:
+  .eq(val)    .ne(val)
+  .gt(val)    .ge(val)
+  .lt(val)    .le(val)
+  .is_in(iter)
+
+Option field operators:
+  .is_some()  .is_none()
+
+Embedded enum matching:
+  .matches(EnumVariant)
+
+Boolean combinators:
+  expr.and(expr)
+  expr.or(expr)
+  expr.not()
+  Expr::and_all(vec![...])
+
+List expression:
+  Expr::<List<T>>::list([...])
+
+
+7  UPDATE
+----------
+
+Instance update builder (generated):
+  record.update()
+      .field_name(new_value)
+      .exec(&mut db)
+      .await?;
+
+Bulk update:
+  use toasty::stmt::Update;
+  Update::<List<Model>>::new(query)
+      .set(Model::fields().field(), value)
+      .exec(&mut db)
+      .await?;
+
+
+8  DELETE
+----------
+
+  use toasty::stmt::Delete;
+
+  Delete::from(query).exec(&mut db).await?;
+
+  // Or via query chain:
+  Model::all().and(filter).delete().exec(&mut db).await?;
+
+
+9  RELATIONS
+-------------
+
+Types:
+  toasty::HasMany<T>    — one-to-many
+  toasty::HasOne<T>     — one-to-one (required)
+  toasty::HasOne<Option<T>> — one-to-one (optional)
+  toasty::BelongsTo<T>  — many-to-one
+
+Loading:
+  Lazy:   record.relation_name().exec(&mut db).await?
+  Eager:  query.include(Model::fields().relation_name())
+
+State:
+  relation.is_unloaded()  — true before loading
+  relation.get()          — panics if unloaded
+
+Nested create:
+  Parent::create().child(Child::create().field(val)).exec(&mut db).await?
+
+
+10  PAGINATION
+---------------
+
+  let page = Model::all().paginate(page_size).exec(&mut db).await?;
+
+  page.items       — Vec<Model>
+  page.has_next()  — bool
+  page.has_prev()  — bool
+  page.next(&mut db).await?  — next page
+  page.prev(&mut db).await?  — previous page
+
+Supports composite keys. Cursor-based (not offset-based).
+
+
+11  TRANSACTIONS
+-----------------
+
+  let mut tx = db.transaction().await?;
+  // ... operations using &mut tx ...
+  tx.commit().await?;
+  // Drop without commit = automatic rollback
+
+Configurable:
+  TransactionBuilder::new()
+      .isolation(IsolationLevel::Serializable)
+      .read_only(false)
+      .begin_on_db(&mut db)
+      .await?;
+
+Nested (savepoints):
+  let mut inner = tx.transaction().await?;
+  inner.commit().await?;
+
+
+12  BATCHING
+-------------
+
+  use toasty::batch;
+
+  let (a, b) = batch((query_a, query_b)).exec(&mut db).await?;
+
+Works with queries, creates, updates, and deletes.
+
+
+13  DATABASE-SPECIFIC NOTES
+-----------------------------
+
+SQL (SQLite, PostgreSQL, MySQL):
+  - Arbitrary WHERE clauses, JOINs for relations
+  - Transaction isolation levels
+
+DynamoDB:
+  - Query methods generated based on primary/sort key
+  - Constraints limited to sort-key conditions
+  - Composite key pagination
+  - Conditional updates for has-one relations
+
+
+14  FEATURE FLAGS
+------------------
+
+  uuid        — uuid::Uuid field support
+  serde       — JSON serialization (#[serialize(json)])
+  jiff        — date/time types from jiff crate
+  decimal     — rust_decimal::Decimal
+  bigdecimal  — bigdecimal::BigDecimal
+
+
+15  KEY DEPENDENCIES
+---------------------
+
+  tokio (async runtime)
+  deadpool (connection pooling)
+  tracing (logging)
+  toasty-core (core types)
+  toasty-macros (proc macros)
+  Driver crates: toasty-driver-sqlite, toasty-driver-pg, toasty-driver-mysql, toasty-driver-dynamodb
