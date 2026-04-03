@@ -1,7 +1,7 @@
 ---
 name: assert-struct-guidance
 description: Always use this skill before writing any test code in the Toasty repository
-advice-for: assert-struct
+crates: assert-struct
 activation: always
 ---
 
