@@ -20,10 +20,10 @@ jobs:
         id: cache
         uses: actions/cache@v4
         with:
-          path: ~/.cargo/bin/symposium
+          path: ~/.cargo/bin/cargo-agents
           key: symposium-${{ runner.os }}-${{ steps.sha.outputs.sha }}
       - name: Install symposium
         if: steps.cache.outputs.cache-hit != 'true'
         run: cargo install symposium --git https://github.com/symposium-dev/symposium
       - name: Validate
-        run: symposium plugin validate .
+        run: cargo agents plugin validate .
