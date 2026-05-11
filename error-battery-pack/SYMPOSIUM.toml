@@ -1,0 +1,5 @@
+name = "error-battery-pack"
+crates = ["anyhow", "thiserror", "eyre", "color-eyre", "miette", "snafu", "displaydoc", "error-stack", "error-battery-pack"]
+
+[[skills]]
+source = "crate"
