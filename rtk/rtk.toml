@@ -1,0 +1,20 @@
+name = "rtk"
+crates = []
+
+# Installs the `rtk` binary via cargo from the rtk-ai/rtk git repo.
+[[installations]]
+name = "rtk"
+source = "cargo"
+crate = "rtk"
+git = "https://github.com/rtk-ai/rtk"
+executable = "rtk"
+
+# Pre-tool-use hook: pulls the rtk-rewrite script from the same repo and runs
+# it via `sh`. The `rtk` requirement ensures the binary is on disk first.
+[[hooks]]
+name = "rewrite"
+event = "PreToolUse"
+matcher = "Bash"
+agent = "claude"
+requirements = ["rtk"]
+command = { source = "github", url = "https://github.com/rtk-ai/rtk", script = "hooks/claude/rtk-rewrite.sh" }
