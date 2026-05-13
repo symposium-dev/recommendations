@@ -3,4 +3,4 @@ crates = ["dial9-tokio-telemetry", "dial9", "dial9-viewer"]
 
 [[skills]]
 crates = ["dial9-viewer"]
-source = "crate"
+source.crate_path = "skills"
