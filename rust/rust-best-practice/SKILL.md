@@ -8,4 +8,5 @@ description: "[Critical] Best practice for Rust coding. Always activate this ski
 * Use `cargo add` to add new dependencies or features rather than editing `Cargo.toml` directly
 * Before finishing your turn, when editing Rust code:
   * Run `cargo fmt` after modifying Rust source files to ensure consistent formatting
+  * Run `cargo clippy --all --workspace` and fix any warnings
   * Run tests (most commonly `cargo test --all --workspace`, though some projects may have other commands)
