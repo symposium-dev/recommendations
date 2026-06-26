@@ -1,0 +1,2 @@
+[discovery.allow]
+crates = { dial9 = "*", dial9-tokio-telemetry = "*", dial9-viewer = "*", error-battery-pack = "*" }

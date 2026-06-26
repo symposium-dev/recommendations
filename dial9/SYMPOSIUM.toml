@@ -1,5 +1,4 @@
-name = "dial9"
-crates = ["dial9-tokio-telemetry", "dial9", "dial9-viewer"]
+where.crates = ["dial9-tokio-telemetry", "dial9", "dial9-viewer"]
 
-[[skills]]
-source = "crate"
+[[plugins]]
+source.crate = "dial9"
