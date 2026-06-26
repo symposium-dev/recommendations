@@ -1,4 +1,2 @@
-where.crates = ["dial9-tokio-telemetry", "dial9", "dial9-viewer"]
-
-[[plugins]]
-source.crate = "dial9"
+[discovery.allow]
+crates = { dial9 = "*", dial9-tokio-telemetry = "*", dial9-viewer = "*" }

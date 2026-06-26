@@ -1,4 +1,2 @@
-where.crates = ["anyhow", "thiserror", "eyre", "color-eyre", "miette", "snafu", "displaydoc", "error-stack", "error-battery-pack"]
-
-[[plugins]]
-source.crate = "error-battery-pack"
+[discovery.allow]
+crates = { anyhow = "*", thiserror = "*", eyre = "*", color-eyre = "*", miette = "*", snafu = "*", displaydoc = "*", error-stack = "*", error-battery-pack = "*" }
