@@ -1,0 +1,20 @@
+[[installations]]
+name = "rtk"
+source = "cargo"
+crate = "rtk"
+git = "https://github.com/rtk-ai/rtk"
+executable = "rtk"
+
+[[installations]]
+name = "rtk-rewrite"
+source = "github"
+url = "https://github.com/rtk-ai/rtk"
+script = "hooks/claude/rtk-rewrite.sh"
+
+[[hooks]]
+name = "rewrite"
+event = "PreToolUse"
+matcher = "Bash"
+agent = "claude"
+requirements = ["rtk"]
+command = "rtk-rewrite"
