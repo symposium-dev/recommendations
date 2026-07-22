@@ -1,5 +1,7 @@
 name = "dial9"
-crates = ["dial9-tokio-telemetry", "dial9", "dial9-viewer"]
+depends-on = ["dial9-tokio-telemetry", "dial9", "dial9-viewer"]
 
-[[skills]]
-source = "crate"
+# The dial9 skills ship in the dial9-viewer crate; load it as a plugin so its
+# skills/ are contributed whenever this plugin is active.
+[[plugins]]
+source.cargo = "dial9-viewer"

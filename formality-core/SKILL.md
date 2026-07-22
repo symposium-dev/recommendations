@@ -1,7 +1,7 @@
 ---
 name: formality-core
 description: Idiomatic patterns for writing code with formality-core (a-mir-formality). Use when writing or reviewing judgment functions, type definitions, or parser-related code in projects built on formality-core.
-crates: formality-core
+depends-on: formality-core
 ---
 
 # Idiomatic formality-core
