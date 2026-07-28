@@ -1,0 +1,20 @@
+name = "rtk"
+depends-on = ["*"]
+
+# Install the RTK binary from its canonical git repository. RTK is not
+# installed from crates.io because another crate uses the same name there.
+[[installations]]
+name = "rtk"
+source = "cargo"
+crate = "rtk"
+git = "https://github.com/rtk-ai/rtk"
+executable = "rtk"
+
+# RTK's native Claude hook reads and writes Claude's PreToolUse wire format.
+[[hooks]]
+name = "rewrite"
+event = "PreToolUse"
+matcher = "Bash"
+format = "claude"
+command = "rtk"
+args = ["hook", "claude"]
