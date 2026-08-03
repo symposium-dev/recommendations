@@ -1,5 +1,5 @@
 name = "symposium"
-crates = ["*"]
+depends-on = ["*"]
 
 [[skills]]
 source.path = "."

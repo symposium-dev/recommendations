@@ -1,8 +1,7 @@
 ---
 name: toasty-guidance
 description: Guidance for using the Toasty async ORM crate — schema definition, CRUD, relations, queries, and transactions
-crates: toasty
-activation: always
+depends-on: toasty
 ---
 
 Toasty is an async ORM for Rust supporting SQL (SQLite, PostgreSQL, MySQL) and NoSQL (DynamoDB). It prioritizes type safety and leans into each database's capabilities rather than hiding them.

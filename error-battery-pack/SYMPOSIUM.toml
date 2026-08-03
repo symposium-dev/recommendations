@@ -1,5 +1,7 @@
 name = "error-battery-pack"
-crates = ["anyhow", "thiserror", "eyre", "color-eyre", "miette", "snafu", "displaydoc", "error-stack", "error-battery-pack"]
+depends-on = ["anyhow", "thiserror", "eyre", "color-eyre", "miette", "snafu", "displaydoc", "error-stack", "error-battery-pack"]
 
-[[skills]]
-source = "crate"
+# The skills ship in the error-battery-pack crate's skills/ directory; load it
+# as a plugin so those skills are contributed whenever this plugin is active.
+[[plugins]]
+source.cargo = "error-battery-pack"
