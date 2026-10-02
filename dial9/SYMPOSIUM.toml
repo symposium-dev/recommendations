@@ -1,7 +1,23 @@
 name = "dial9"
-depends-on = ["dial9-tokio-telemetry", "dial9", "dial9-viewer"]
+# Every crate named here gates the whole entry before any edge is evaluated.
+# dial9-tokio-telemetry stays so that a project declaring only it (the 0.3
+# shape) reaches the fallback edge instead of getting nothing.
+depends-on = ["dial9", "dial9-viewer", "dial9-tokio-telemetry"]
 
-# The dial9 skills ship in the dial9-viewer crate; load it as a plugin so its
-# skills/ are contributed whenever this plugin is active.
+# Serving edge: dial9 carries its own skills from 0.5.2, so a project at or
+# above the floor gets the set matching the version it resolved. A workspace
+# whose members pin different dial9 versions gets the lowest declared one.
+# The two edges are mutually exclusive, so no skill installs twice.
 [[plugins]]
+predicates = ["depends-on(dial9>=0.5.2)"]
+source.cargo = "dial9"
+
+# Fallback for everything else: a pin below the floor, any prerelease (a >=
+# bound never matches one, even above the floor, so the negation keeps the
+# pair exhaustive), or a project declaring only dial9-tokio-telemetry. Serves
+# the dial9-viewer the project resolves, or the newest published one when it
+# does not declare it, whose skills may describe a different version than the
+# project uses. Accepted: skew beats leaving those projects with no skills.
+[[plugins]]
+predicates = ["not(depends-on(dial9>=0.5.2))"]
 source.cargo = "dial9-viewer"
