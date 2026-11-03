@@ -7,17 +7,25 @@ depends-on = ["dial9", "dial9-viewer", "dial9-tokio-telemetry"]
 # Serving edge: dial9 carries its own skills from 0.5.2, so a project at or
 # above the floor gets the set matching the version it resolved. A workspace
 # whose members pin different dial9 versions gets the lowest declared one.
-# The two edges are mutually exclusive, so no skill installs twice.
+# A project that declares dial9-viewer itself is left to the viewer edge: the
+# viewer is a library too (an embedded viewer over a custom store), and such a
+# project would otherwise reach one skill set through two crates and install
+# every skill twice, once under a hash-suffixed name.
 [[plugins]]
-predicates = ["depends-on(dial9>=0.5.2)"]
+predicates = ["depends-on(dial9>=0.5.2)", "not(depends-on(dial9-viewer))"]
 source.cargo = "dial9"
 
 # Fallback for everything else: a pin below the floor, any prerelease (a >=
 # bound never matches one, even above the floor, so the negation keeps the
-# pair exhaustive), or a project declaring only dial9-tokio-telemetry. Serves
-# the dial9-viewer the project resolves, or the newest published one when it
-# does not declare it, whose skills may describe a different version than the
+# pair exhaustive), a project declaring only dial9-tokio-telemetry, or one
+# declaring dial9-viewer directly. The exact complement of the serving edge,
+# so exactly one edge fires and no skill installs twice. Serves the
+# dial9-viewer the project resolves, or the newest published one when it does
+# not declare it, whose skills may describe a different version than the
 # project uses. Accepted: skew beats leaving those projects with no skills.
+# dial9 and dial9-viewer release in lockstep, so a project declaring both is
+# still served a version-matched set; pins that disagree get the lower one's,
+# the same rule a workspace already follows.
 [[plugins]]
-predicates = ["not(depends-on(dial9>=0.5.2))"]
+predicates = ["any(not(depends-on(dial9>=0.5.2)), depends-on(dial9-viewer))"]
 source.cargo = "dial9-viewer"
