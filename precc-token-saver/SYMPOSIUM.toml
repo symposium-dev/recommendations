@@ -1,0 +1,23 @@
+# PRECC plugin for cargo-symposium.
+#
+# When `cargo agents init` runs in any Rust project (the `crates = ["*"]`
+# wildcard activates this plugin universally), Symposium installs the
+# `precc-token-saver` skill into every agent it has wired up. The skill's
+# SKILL.md instructs the agent to run the bundled installer, which in
+# turn calls https://peria.ai/install.sh — the same path users without
+# Symposium use today.
+#
+# We do NOT register an MCP server. PRECC's interception layer is the
+# PreToolUse:Bash hook (and friends), which the installer wires into the
+# native settings of whichever agents Symposium has configured. Symposium
+# itself doesn't need to know about that — `precc init` (run by the
+# installer) handles the per-agent registration.
+
+name = "precc-token-saver"
+crates = ["*"]
+
+[[skills]]
+# Skill files live in the same directory as this manifest (SKILL.md +
+# resources/). Same convention as toasty/ and other one-skill plugins
+# in symposium-dev/recommendations.
+source.path = "."
