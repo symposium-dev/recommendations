@@ -1,0 +1,5 @@
+name = "symposium"
+crates = ["rhaicp"]
+
+[[skills]]
+source = "crate"
